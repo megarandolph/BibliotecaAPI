@@ -21,4 +21,4 @@ COPY --from=build-env /out .
 EXPOSE 80
 
 # Comando para ejecutar la aplicación
-ENTRYPOINT ["dotnet", "bibliotecaAPI.dll"]
+ENTRYPOINT ["dotnet", "BibliotecaAPI.dll"]
