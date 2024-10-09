@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BibliotecaAPI.Controllers
 {
-    //[Authorize]
+    
     [ApiController]
     [Route("[controller]")]
     public class CategoriaController : ControllerBase
@@ -48,7 +48,7 @@ namespace BibliotecaAPI.Controllers
                 return StatusCode(500, "Internal server error"); // Código 500 Internal Server Error
             }
         }
-
+        [Authorize]
         [HttpPost]
         public async Task<ActionResult<Response>> Post(CategoriaDTO param)
         {
@@ -79,7 +79,7 @@ namespace BibliotecaAPI.Controllers
                 return StatusCode(500, result); // Código 500 Internal Server Error
             }
         }
-
+        [Authorize]
         [HttpPut]
         public async Task<ActionResult<Response>> Put(CategoriaDTO param)
         {
@@ -110,7 +110,7 @@ namespace BibliotecaAPI.Controllers
                 return StatusCode(500, result); // Código 500 Internal Server Error
             }
         }
-
+        [Authorize]
         [HttpDelete]
         public async Task<ActionResult<Response>> Delete(int CategoriaId)
         {

@@ -48,7 +48,7 @@ namespace BibliotecaAPI.Controllers
                 return StatusCode(500, "Internal server error"); // Código 500 Internal Server Error
             }
         }
-        //[Authorize]
+        [Authorize]
         [HttpPost]
         public async Task<ActionResult<Response>> Post(LibroDTO param)
         {
