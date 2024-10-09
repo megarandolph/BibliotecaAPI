@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BibliotecaAPI.Controllers
 {
-    [Authorize]
+    //[Authorize]
     [ApiController]
     [Route("[controller]")]
     public class AutorController : ControllerBase

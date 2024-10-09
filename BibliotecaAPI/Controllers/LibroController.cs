@@ -21,7 +21,7 @@ namespace BibliotecaAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<Response<Libro>>> Get(int type = 0, int LibroId = 0)
+        public async Task<ActionResult<Response<LibroDTO>>> Get(int type = 0, int LibroId = 0)
         {
 
             if (!ModelState.IsValid)
@@ -48,7 +48,7 @@ namespace BibliotecaAPI.Controllers
                 return StatusCode(500, "Internal server error"); // Código 500 Internal Server Error
             }
         }
-        [Authorize]
+        //[Authorize]
         [HttpPost]
         public async Task<ActionResult<Response>> Post(LibroDTO param)
         {

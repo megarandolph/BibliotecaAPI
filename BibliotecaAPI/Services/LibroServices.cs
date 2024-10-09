@@ -7,7 +7,7 @@ namespace BibliotecaAPI.Services
 {
     public interface ILibroServices
     {
-        Response<Libro> Get(int type = 0, int LibroId = 0);
+        Response<LibroDTO> Get(int type = 0, int LibroId = 0);
         Response Post(LibroDTO LibroDTO);
         Response Put(LibroDTO LibroDTO);
         Response Delete(int LibroID);
@@ -23,9 +23,9 @@ namespace BibliotecaAPI.Services
             _mapper = mapper;
         }
 
-        public Response<Libro> Get(int type = 0, int LibroId = 0)
+        public Response<LibroDTO> Get(int type = 0, int LibroId = 0)
         {
-            var response = new Response<Libro>();
+            var response = new Response<LibroDTO>();
 
             try
             {
@@ -35,8 +35,15 @@ namespace BibliotecaAPI.Services
                 {
                     Data = Data.Where(x => x.LibroId == LibroId).ToList();
                 }
+                var mapped = _mapper.Map<List<LibroDTO>>(Data);
 
-                response.DataList = Data;
+                mapped.ForEach(x =>
+                {
+                    x.Autores = GetAutorLibro(x.LibroId).DataList.Select(x=>x.AutorId).ToList();
+                    x.Categorias = GetCategoriaLibro(x.LibroId).DataList.Select(x => x.CategoriaId).ToList();
+                });
+
+                response.DataList = mapped;
             }
             catch (Exception ex)
             {
@@ -46,6 +53,45 @@ namespace BibliotecaAPI.Services
 
             return response;
         }
+
+        public Response<LibroCategorium> GetCategoriaLibro(int LibroId = 0)
+        {
+            var response = new Response<LibroCategorium>();
+
+            try
+            {
+                var Data = _dbContext.LibroCategoria.Where(x => x.LibroId == LibroId && x.Status == true).ToList();
+
+                response.DataList = Data;
+            }
+            catch (Exception ex)
+            {
+                response.Errors.Add("Ha ocurrido un error tratando de obtener las categorias de los libros.");
+            }
+
+
+            return response;
+        }
+
+        public Response<LibroAutor> GetAutorLibro(int LibroId = 0)
+        {
+            var response = new Response<LibroAutor>();
+
+            try
+            {
+                var Data = _dbContext.LibroAutors.Where(x=>x.LibroId == LibroId && x.Status == true).ToList();
+
+                response.DataList = Data;
+            }
+            catch (Exception ex)
+            {
+                response.Errors.Add("Ha ocurrido un error tratando de obtener las categorias de los libros.");
+            }
+
+
+            return response;
+        }
+
         public Response Post(LibroDTO LibroDTO)
         {
             var response = new Response();
@@ -63,7 +109,8 @@ namespace BibliotecaAPI.Services
                     var resultCategoria = LibroCategoria(Libro.LibroId, LibroDTO.Categorias);
                     var resultAutores = LibroAutor(Libro.LibroId, LibroDTO.Autores);
 
-                    if (resultCategoria.Errors.Count() > 0) {
+                    if (resultCategoria.Errors.Count() > 0)
+                    {
                         response.Errors.Add(resultCategoria.Errors[0]);
                     }
                     if (resultAutores.Errors.Count() > 0)
@@ -94,6 +141,18 @@ namespace BibliotecaAPI.Services
                 var data = _dbContext.Libros.Find(LibroDTO.LibroId);
                 _mapper.Map(LibroDTO, data);
                 _dbContext.SaveChanges();
+
+                var resultCategoria = LibroCategoria(LibroDTO.LibroId, LibroDTO.Categorias);
+                var resultAutores = LibroAutor(LibroDTO.LibroId, LibroDTO.Autores);
+
+                if (resultCategoria.Errors.Count() > 0)
+                {
+                    response.Errors.Add(resultCategoria.Errors[0]);
+                }
+                if (resultAutores.Errors.Count() > 0)
+                {
+                    response.Errors.Add(resultAutores.Errors[0]);
+                }
             }
             catch (Exception ex)
             {
@@ -122,8 +181,9 @@ namespace BibliotecaAPI.Services
             return response;
         }
 
-        public Response LibroCategoria(int LibroId, List<int?> Categorias) {
-           
+        public Response LibroCategoria(int LibroId, List<int?> Categorias)
+        {
+
             var response = new Response();
 
             var existdata = _dbContext.LibroCategoria.Where(x => x.LibroId == LibroId).Select(x => x.CategoriaId).ToList();
@@ -132,15 +192,16 @@ namespace BibliotecaAPI.Services
 
             var soloEnListaComparacion = Categorias.Except(existdata).ToList();
 
-            var valoresCoincidentes = existdata.Intersect(Categorias).ToList();           
+            var valoresCoincidentes = existdata.Intersect(Categorias).ToList();
 
             try
             {
-                var mapped = new LibroCategorium();
                 foreach (var item in soloEnListaComparacion)
                 {
+                    var mapped = new LibroCategorium();
                     mapped.LibroId = LibroId;
                     mapped.CategoriaId = item;
+                    mapped.Status = true;
                     _dbContext.LibroCategoria.Add(mapped);
                     _dbContext.SaveChanges();
                 }
@@ -182,11 +243,12 @@ namespace BibliotecaAPI.Services
 
             try
             {
-                var mapped = new LibroAutor();
                 foreach (var item in soloEnListaComparacion)
                 {
+                    var mapped = new LibroAutor();
                     mapped.LibroId = LibroId;
                     mapped.AutorId = item;
+                    mapped.Status = true;
                     _dbContext.LibroAutors.Add(mapped);
                     _dbContext.SaveChanges();
                 }
