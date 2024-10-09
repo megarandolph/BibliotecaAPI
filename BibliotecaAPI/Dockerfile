@@ -1,24 +1,25 @@
-# Etapa 1: Construcción de la aplicación
-FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build-env
+#See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
+
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+USER app
 WORKDIR /app
+EXPOSE 8080
+EXPOSE 8081
 
-# Copiar los archivos del proyecto y restaurar las dependencias
-COPY *.csproj ./
-RUN dotnet restore
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+ARG BUILD_CONFIGURATION=Release
+WORKDIR /src
+COPY ["BibliotecaAPI/BibliotecaAPI.csproj", "BibliotecaAPI/"]
+RUN dotnet restore "./BibliotecaAPI/./BibliotecaAPI.csproj"
+COPY . .
+WORKDIR "/src/BibliotecaAPI"
+RUN dotnet build "./BibliotecaAPI.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
-# Copiar el resto de los archivos y compilar la aplicación
-COPY . ./
-RUN dotnet publish -c Release -o /out
+FROM build AS publish
+ARG BUILD_CONFIGURATION=Release
+RUN dotnet publish "./BibliotecaAPI.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
-# Etapa 2: Imagen final
-FROM mcr.microsoft.com/dotnet/aspnet:7.0
+FROM base AS final
 WORKDIR /app
-
-# Copiar los archivos compilados desde la etapa de construcción
-COPY --from=build-env /out .
-
-# Configurar la aplicación para escuchar en el puerto 80
-EXPOSE 80
-
-# Comando para ejecutar la aplicación
+COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "BibliotecaAPI.dll"]
