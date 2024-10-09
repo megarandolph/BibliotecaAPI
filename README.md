@@ -1,5 +1,5 @@
 # BibliotecaAPI
-Este proyecto fue creado en `.net core` utilizando el framework `.net 8`.
+Este proyecto fue creado en `.NET CORE API` utilizando el framework `.NET 8`.
 
 ## Como descargarlo
 Deben de ir al boton verde que dice `<> code` y ahi seleccionan la opcion que prefieran ya sea clonar el repositio mediante el `link` o descargarlo como `.zip` y descomprirlo en una carpeta que gusten
